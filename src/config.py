@@ -19,6 +19,8 @@ class PostgresDatabaseURL(BaseModel):
 
 
 class MinIO(BaseModel):
+    service_name: str
+    bucket_name: str
     endpoint_url: str
     aws_secret_access_key: str
     aws_access_key_id: str

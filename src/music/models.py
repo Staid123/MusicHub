@@ -1,5 +1,4 @@
 from sqlalchemy import Boolean, ForeignKey, LargeBinary, MetaData
-from typing import TYPE_CHECKING
 from sqlalchemy.orm import (
     Mapped,
     DeclarativeBase,
@@ -31,16 +30,16 @@ class Song(Base):
     artist_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     album_id: Mapped[int] = mapped_column(ForeignKey('album.id'), nullable=True)
 
-    artist: Mapped["User"] = relationship('Artist', back_populates='song')
+    artist: Mapped["User"] = relationship('User', back_populates='songs')
     album: Mapped["Album"] = relationship('Album', back_populates='songs')
 
 
 class Album(Base):
-    title: Mapped[str]
+    name: Mapped[str]
     artist_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
  
-    artist: Mapped["User"] = relationship('Artist', back_populates='albums')
-    songs: Mapped["Song"] = relationship('Song', back_populates='album')
+    artist: Mapped["User"] = relationship('User', back_populates='albums')
+    songs: Mapped[list["Song"]] = relationship('Song', back_populates='album')
 
 
 class User(Base):
@@ -50,5 +49,5 @@ class User(Base):
     active: Mapped[bool] = mapped_column(Boolean, default=True, server_default='true')
     role: Mapped["Role"]
 
-    songs: Mapped[list["Song"]] = relationship('Song', back_populates='user')
-    albums: Mapped[list["Album"]] = relationship('Album', back_populates='user')
+    songs: Mapped[list["Song"]] = relationship('Song', back_populates='artist')
+    albums: Mapped[list["Album"]] = relationship('Album', back_populates='artist')
