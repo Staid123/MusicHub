@@ -1,0 +1,47 @@
+services:
+  music_fastapi:
+    container_name: music_fastapi
+    build: 
+      context: .
+    ports:
+      - 8000:8000
+    depends_on:
+      - music_database
+
+  music_database:
+    image: postgres:latest
+    container_name: music_database
+    env_file:
+      - ./.env_db
+    ports:
+      - "65400:5432"
+    volumes:
+      - postgres_music_database:/var/lib/postgresql/data/
+      
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - music_database
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    env_file:
+      - ./.env_minio
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"  # Добавляем этот порт
+    command: server /data --console-address ":9001"  # Указываем фиксированный порт для веб-интерфейса
+
+
+volumes:
+  postgres_music_database:
+  minio-data:
