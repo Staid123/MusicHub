@@ -1,8 +1,9 @@
 import logging
 from typing import Annotated, Any
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from music.schemas import SongIn, SongOut
+from music.enums import Genre
+from music.schemas import Files, SongOut
 from database import db_helper
 from music.service.song_service import SongService, get_song_service
 from music.utils import get_music_filters
@@ -31,14 +32,32 @@ async def get_all_songs(
         **filters
     )
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=Files, status_code=status.HTTP_201_CREATED)
 async def create_song(
-    song_in: SongIn,
-    # user: Annotated[User, Depends(admin)],
+    name: Annotated[str, Form()],
+    genre: Annotated[Genre, Form()],
+    artist_id: Annotated[int, Form(gt=0)],
+    album_id: Annotated[int, Form(gt=0)],
+    song_file: Annotated[UploadFile, File(...)],
+    photo_file: Annotated[UploadFile, File(...)],
     song_service: Annotated[SongService, Depends(get_song_service)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-) -> None:
+) -> Files:
     return await song_service.create_song(
         session=session,
-        song_in=song_in
+        name=name,
+        genre=genre,
+        artist_id=artist_id,
+        album_id=album_id,
+        song_file=song_file,
+        photo_file=photo_file
     )
+
+
+# async def s3_download(key: str):
+#     try:
+#         return s3.Object(bucket_name=AWS_BUCKET, key=key).get()['Body'].read()
+#     except ClientError as err:
+#         logging.error(str(err))
+
+
