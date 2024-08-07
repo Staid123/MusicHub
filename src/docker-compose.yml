@@ -8,6 +8,9 @@ services:
       - 8000:8000
     depends_on:
       - music_database
+    environment:
+      - AWS_ACCESS_KEY_ID=AKIAQKGGXORX6BLENMFB
+      - AWS_SECRET_ACCESS_KEY=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
 
   music_database:
     image: postgres:latest
@@ -19,6 +22,16 @@ services:
     volumes:
       - postgres_music_database:/var/lib/postgresql/data/
       
+  test_database:
+    image: postgres:latest
+    container_name: test_database
+    env_file:
+      - ./.env_test_db
+    ports:
+      - "65401:5432"
+    volumes:
+      - postgres_test_database:/var/lib/postgresql/data/
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
@@ -29,20 +42,18 @@ services:
       - "5050:80"
     depends_on:
       - music_database
+      - test_database
 
-  minio:
-    image: minio/minio
-    container_name: minio
-    env_file:
-      - ./.env_minio
-    volumes:
-      - minio-data:/data
-    ports:
-      - "9000:9000"
-      - "9001:9001"  # Добавляем этот порт
-    command: server /data --console-address ":9001"  # Указываем фиксированный порт для веб-интерфейса
-
+  test:
+    container_name: test
+    build: 
+      context: .
+    command: ["pytest", "--maxfail=1", "--disable-warnings", "-v"]
+    depends_on:
+      - test_database
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://user:password@test_database:5432/test_db
 
 volumes:
   postgres_music_database:
-  minio-data:
+  postgres_test_database:
