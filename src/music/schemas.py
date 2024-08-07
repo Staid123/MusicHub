@@ -1,5 +1,4 @@
-from pydantic import ConfigDict, BaseModel, EmailStr
-from typing import TYPE_CHECKING
+from pydantic import ConfigDict, BaseModel, EmailStr, field_validator
 from fastapi import UploadFile
 
 from music.enums import Role
@@ -13,10 +12,12 @@ class SongBase(BaseModel):
     genre: "Genre"
     artist_id: int
     album_id: int
+    file_url: str | None = None
+    photo_url: str | None = None
 
 
 class SongIn(SongBase):
-    image: UploadFile
+    pass
 
 
 class SongOut(SongIn):
@@ -37,7 +38,8 @@ class AlbumBase(BaseModel):
 
 
 class AlbumIn(AlbumBase):
-    image: UploadFile
+    pass
+    # image: UploadFile
 
 
 class AlbumOut(AlbumIn):
@@ -72,3 +74,8 @@ class TokenInfo(BaseModel):
     access_token: str
     refresh_token: str | None = None
     token_type: str = "Bearer"
+
+
+class Files(BaseModel):
+    song_filename: str
+    photo_filename: str
