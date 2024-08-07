@@ -17,32 +17,25 @@ class PostgresDatabaseURL(BaseModel):
         "pk": "pk_%(table_name)s",
     }
 
-
-class MinIO(BaseModel):
-    service_name: str
-    bucket_name: str
-    endpoint_url: str
-    aws_secret_access_key: str
-    aws_access_key_id: str
-    region_name: str = 'us-east-1'
-    use_ssl: bool = False
-
-
 # class AuthJWT(BaseModel):
 #     private_key: str = private_key_path.read_text()
 #     public_key: str = public_key_path.read_text()
 #     algorithm: str = "RS256"
 
 
+class AWSSettings(BaseModel):
+    bucket_name: str
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=[".env", ".env_minio"],
+        env_file=".env",
         case_sensitive=False,
         env_nested_delimiter="__"
     )
     # auth_jwt: AuthJWT = AuthJWT()
     db: PostgresDatabaseURL
-    minio: MinIO
+    aws: AWSSettings
 
 
 settings: Settings = Settings()
