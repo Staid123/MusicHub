@@ -27,7 +27,10 @@ class SongOut(SongIn):
 
 
 class SongUpdate(BaseModel):
-    image: UploadFile
+    name: str | None = None
+    genre: Genre | None = None
+    file_url: str | None = None
+    photo_url: str | None = None
 
 
 class AlbumBase(BaseModel):
@@ -77,5 +80,5 @@ class TokenInfo(BaseModel):
 
 
 class Files(BaseModel):
-    song_filename: str
-    photo_filename: str
+    song_filename: str | None = None
+    photo_filename: str | None = None

@@ -44,16 +44,6 @@ services:
       - music_database
       - test_database
 
-  test:
-    container_name: test
-    build: 
-      context: .
-    command: ["pytest", "--maxfail=1", "--disable-warnings", "-v"]
-    depends_on:
-      - test_database
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://user:password@test_database:5432/test_db
-
 volumes:
   postgres_music_database:
   postgres_test_database:

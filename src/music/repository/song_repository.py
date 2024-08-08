@@ -31,6 +31,19 @@ class AbstractRepository(ABC):
 
 class SongRepository(AbstractRepository):
     @staticmethod
+    async def get_song_by_id(
+        session: AsyncSession,
+        song_id: int
+    ) -> Song:
+        song: Song = await session.get(Song, song_id)
+        if song:
+           return song
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Song not found"
+        )
+
+    @staticmethod
     async def get_songs(
         session: AsyncSession,
         **filters
@@ -55,7 +68,7 @@ class SongRepository(AbstractRepository):
     async def create_song(
         session: AsyncSession,
         song_in: SongIn
-    ) -> None:
+    ) -> Song:
         try:
             song = Song(**song_in.model_dump())
             session.add(song)
@@ -66,6 +79,47 @@ class SongRepository(AbstractRepository):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Can not add song"
+            )
+        
+    @staticmethod
+    async def update_song(
+        session: AsyncSession,
+        song_id: int,
+        song_update: SongUpdate
+    ) -> Song:
+        song: Song = await SongRepository.get_song_by_id(
+            session=session,
+            song_id=song_id
+        )
+        try:
+            for name, value in song_update.model_dump(exclude_none=True).items():
+                setattr(song, name, value)
+            await session.commit()
+            return song
+        except Exception:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Can not update song"
+            )
+
+    @staticmethod
+    async def delete_song(
+        session: AsyncSession,
+        song_id: int
+    ) -> None:
+        song: Song = await SongRepository.get_song_by_id(
+            session=session,
+            song_id=song_id
+        )
+        try:
+            await session.delete(song)
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Can not delete review"
             )
 
 # Зависимость для получения репозитория

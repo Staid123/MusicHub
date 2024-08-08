@@ -1,6 +1,6 @@
 import logging
 from typing import Annotated, Any
-from fastapi import APIRouter, Depends, File, Form, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Response, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from music.enums import Genre
 from music.schemas import Files, SongOut
@@ -54,10 +54,48 @@ async def create_song(
     )
 
 
-# async def s3_download(key: str):
-#     try:
-#         return s3.Object(bucket_name=AWS_BUCKET, key=key).get()['Body'].read()
-#     except ClientError as err:
-#         logging.error(str(err))
+@router.patch("/{song_id}/", response_model=Files, response_model_exclude_none=True)
+async def update_song(
+    song_id: int,
+    song_service: Annotated[SongService, Depends(get_song_service)],
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    name: str | None = Form(default=None),
+    genre: Genre | None = Form(default=None),
+    song_file: UploadFile | None = File(None),
+    photo_file: UploadFile | None = File(None),
+) -> Files:
+    return await song_service.update_song(
+        session=session,
+        song_id=song_id,
+        name=name,
+        genre=genre,
+        song_file=song_file,
+        photo_file=photo_file
+    )
 
 
+@router.delete("/{song_id}/", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_song(
+    song_id: int,
+    song_service: Annotated[SongService, Depends(get_song_service)],
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+) -> None:
+    return await song_service.delete_song(
+        song_id=song_id,
+        session=session
+    )
+
+
+@router.get("/download", description="Enter only file name without folders")
+async def download_song_or_photo(
+    file_name: str,
+    song_service: Annotated[SongService, Depends(get_song_service)],
+) -> Response:
+    contents = await song_service.download_song_or_photo_file(file_name=file_name)
+    return Response(
+        content=contents,
+        headers={
+            'Content-Disposition': f'attachment;filename={file_name}',
+            'Content-Type': 'application/octet-stream',
+        }
+    )

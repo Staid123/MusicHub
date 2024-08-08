@@ -37,5 +37,4 @@ class Settings(BaseSettings):
     db: PostgresDatabaseURL
     aws: AWSSettings
 
-
 settings: Settings = Settings()
