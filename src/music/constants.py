@@ -2,6 +2,7 @@ SONGS = "songs"
 PHOTO = "photos"
 MUSIC = "music"
 IMAGES = "images"
+ALBUMS = "albums"
 
 
 SUPPORTED_FILE_TYPES = {

@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from music.models import Song
-from music.schemas import SongIn, SongOut, SongUpdate
+from music.schemas import SongIn, SongUpdate
 
 
 class AbstractRepository(ABC):
@@ -119,7 +119,7 @@ class SongRepository(AbstractRepository):
             await session.rollback()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Can not delete review"
+                detail="Can not delete song"
             )
 
 # Зависимость для получения репозитория

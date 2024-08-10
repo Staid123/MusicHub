@@ -2,6 +2,7 @@ import logging
 from typing import Annotated, Any
 from fastapi import APIRouter, Depends, File, Form, Response, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from music.constants import SONGS
 from music.enums import Genre
 from music.schemas import Files, SongOut
 from database import db_helper
@@ -91,7 +92,10 @@ async def download_song_or_photo(
     file_name: str,
     song_service: Annotated[SongService, Depends(get_song_service)],
 ) -> Response:
-    contents = await song_service.download_song_or_photo_file(file_name=file_name)
+    contents = await song_service.download_song_or_photo_file(
+        file_name=file_name,
+        folder_type=SONGS
+    )
     return Response(
         content=contents,
         headers={
