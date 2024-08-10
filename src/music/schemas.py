@@ -1,7 +1,6 @@
-from pydantic import ConfigDict, BaseModel, EmailStr, field_validator
-from fastapi import UploadFile
+from pydantic import ConfigDict, BaseModel
 
-from music.enums import Role
+from auth.schemas import UserBase
 from music.enums import Genre
 
 
@@ -38,11 +37,11 @@ class AlbumBase(BaseModel):
 
     name: str
     artist_id: int
+    photo_url: str | None = None
 
 
 class AlbumIn(AlbumBase):
     pass
-    # image: UploadFile
 
 
 class AlbumOut(AlbumIn):
@@ -51,34 +50,11 @@ class AlbumOut(AlbumIn):
     songs: list["SongBase"]
 
 
-class AlbomUpdate(BaseModel):
-    image: UploadFile
+class AlbumUpdate(BaseModel):
+    name: str | None = None
+    photo_url: str | None = None
 
-
-class UserBase(BaseModel):
-    model_config = ConfigDict(from_attributes=True, strict=True)
-
-    username: str
-    email: EmailStr
-    role: "Role"
-    
-
-class UserIn(UserBase):
-    password_hash: str
-
-
-class UserOut(UserBase):
-    id: int
-    active: bool = True
-    password_hash: bytes
-
-
-class TokenInfo(BaseModel):
-    access_token: str
-    refresh_token: str | None = None
-    token_type: str = "Bearer"
-
-
+ 
 class Files(BaseModel):
     song_filename: str | None = None
     photo_filename: str | None = None
