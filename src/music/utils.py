@@ -6,11 +6,11 @@ from music.enums import Genre
 
 
 def get_music_filters(
-    id: Optional[int] = Query(default=None, ge=0),
+    id: Optional[int] = Query(default=None, gt=0),
     name: str = Query(default=None),
     genre: "Genre" = Query(default=None),
-    artist_id: int = Query(default=None, ge=0),
-    album_id: int = Query(default=None, ge=0),
+    artist_id: int = Query(default=None, gt=0),
+    album_id: int = Query(default=None, gt=0),
     skip: int = Query(default=0, ge=0), 
     limit: int = Query(default=10, ge=1),
 ) -> dict[str, Any]:
@@ -32,9 +32,9 @@ def get_music_filters(
 
 
 def get_album_filters(
-    id: Optional[int] = Query(default=None, ge=0),
+    id: Optional[int] = Query(default=None, gt=0),
     name: str = Query(default=None),
-    artist_id: int = Query(default=None, ge=0),
+    artist_id: int = Query(default=None, gt=0),
     skip: int = Query(default=0, ge=0), 
     limit: int = Query(default=10, ge=1),
 ) -> dict[str, Any]:

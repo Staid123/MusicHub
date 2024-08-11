@@ -10,10 +10,4 @@ class Genre(Enum):
     ELECTRONIC = "electronic"
     REGGAE = "reggae"
     BLUES = "blues"
-
-
-class Role(Enum):
-    ARTIST = "artist"
-    USER = "user"
-    ADMIN = "admin"
-    GUEST = "guest"
+    

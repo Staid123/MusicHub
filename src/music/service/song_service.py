@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from aws.s3_actions import S3Client
 from music.enums import Genre
 from music.schemas import SongIn, SongOut, SongUpdate, Files
-from music.models import Song
+from database.models import Song
 from music.repository.song_repository import SongRepository, get_song_repository
 from music.constants import MUSIC, SONGS, IMAGES
 from music.service.mixins.file_action_mixin import FileActionMixin

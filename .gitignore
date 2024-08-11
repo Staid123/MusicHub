@@ -6,4 +6,4 @@ __pycache__/
 .env_db
 .env
 .env_minio
-.env_test_db
+certs/

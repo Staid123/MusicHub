@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
-from music.models import Song
+from database.models import Song
 from music.schemas import SongIn, SongUpdate
 
 

@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, MetaData, UniqueConstraint
+from sqlalchemy import Boolean, LargeBinary, ForeignKey, MetaData, UniqueConstraint
 from sqlalchemy.orm import (
     Mapped,
     DeclarativeBase,
@@ -6,10 +6,9 @@ from sqlalchemy.orm import (
     declared_attr,
     relationship,
 )
-from auth.models import User
 from music.enums import Genre
 from config import settings
-
+from auth.enums import Role
 
 
 class Base(DeclarativeBase):
@@ -24,6 +23,17 @@ class Base(DeclarativeBase):
     def __tablename__(cls) -> str:
         return cls.__name__.lower()
     
+
+class User(Base):
+    username: Mapped[str] = mapped_column(unique=True)
+    email: Mapped[str]
+    password_hash: Mapped[bytes] = mapped_column(LargeBinary)
+    active: Mapped[bool] = mapped_column(Boolean, default=True, server_default='true')
+    role: Mapped["Role"] = mapped_column(default=Role.GUEST, server_default="guest")
+
+    songs: Mapped[list["Song"]] = relationship('Song', back_populates='artist')
+    albums: Mapped[list["Album"]] = relationship('Album', back_populates='artist')
+
 
 class Song(Base):
     name: Mapped[str]

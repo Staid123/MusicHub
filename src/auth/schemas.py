@@ -1,10 +1,11 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
 
-from music.enums import Role
+from auth.enums import Role
+from music.enums import Genre
 
 
 class UserBase(BaseModel):
-    model_config = ConfigDict(from_attributes=True, strict=True)
+    model_config = ConfigDict(from_attributes=True)
 
     username: str
     email: EmailStr
@@ -21,8 +22,26 @@ class UserOut(UserBase):
     role: Role = Role.GUEST
     password_hash: bytes
 
+    albums: list["Album"] = []
+
 
 class TokenInfo(BaseModel):
     access_token: str
     refresh_token: str | None = None
     token_type: str = "Bearer"
+
+
+class Album(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    id: int
+    name: str
+    songs: list["Song"] = []
+
+
+class Song(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    id: int
+    name: str
+    genre: "Genre"

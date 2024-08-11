@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload, selectinload
-from music.models import Album
-from music.schemas import AlbumIn, AlbumUpdate
+from database.models import Album
+from music.schemas import AlbumIn, AlbumOut, AlbumUpdate
 
 
 
@@ -35,8 +35,17 @@ class AlbumRepository(AbstractRepository):
     async def get_album_by_id(
         session: AsyncSession,
         album_id: int
-    ) -> Album:
-        album: Album = await session.get(Album, album_id)
+    ) -> Album | None:
+        stmt = (
+            select(Album)
+            .options(
+                joinedload(Album.artist),
+                selectinload(Album.songs)
+            )
+            .filter_by(id=album_id)
+        )
+        result = await session.scalars(stmt)
+        album: Album = result.one_or_none()
         if album:
            return album
         raise HTTPException(

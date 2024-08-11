@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from aws.s3_actions import S3Client
 from music.repository.song_repository import SongRepository, get_song_repository
 from music.schemas import AlbumIn, AlbumOut, AlbumUpdate, Files
-from music.models import Album
+from database.models import Album
 from music.repository.album_repository import AlbumRepository, get_album_repository
 from music.constants import ALBUMS, IMAGES
 from music.service.mixins.file_action_mixin import FileActionMixin
@@ -98,7 +98,7 @@ class AlbumService(AbstractAlbumService, FileActionMixin):
         album_repository: AlbumRepository = get_album_repository(),
         song_repository: SongRepository = get_song_repository()
     ) -> None:
-        album: Album = await album_repository.get_album_by_id(session=session, album_id=album_id)
+        album: AlbumOut = await album_repository.get_album_by_id(session=session, album_id=album_id)
         
         async with S3Client() as s3_client:
             await AlbumService._delete_file(s3_client, album.photo_url)
