@@ -2,6 +2,8 @@ import logging
 from typing import Annotated, Any
 from fastapi import APIRouter, Depends, File, Form, Response, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from auth.schemas import UserOut
+from auth.validation import get_current_active_auth_user
 from music.constants import ALBUMS
 from music.schemas import Files, AlbumOut
 from database import db_helper
@@ -41,7 +43,7 @@ async def get_list_albums(
 )
 async def create_album(
     name: Annotated[str, Form()],
-    artist_id: Annotated[int, Form(gt=0)],
+    user: Annotated[UserOut, Depends(get_current_active_auth_user)],
     photo_file: Annotated[UploadFile, File(...)],
     album_service: Annotated[AlbumService, Depends(get_album_service)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
@@ -49,7 +51,7 @@ async def create_album(
     return await album_service.create_album(
         session=session,
         name=name,
-        artist_id=artist_id,
+        user=user,
         photo_file=photo_file
     )
 
@@ -61,6 +63,7 @@ async def create_album(
 )
 async def update_album(
     album_id: int,
+    user: Annotated[UserOut, Depends(get_current_active_auth_user)],
     album_service: Annotated[AlbumService, Depends(get_album_service)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
     name: str | None = Form(default=None),
@@ -70,7 +73,8 @@ async def update_album(
         session=session,
         name=name,
         album_id=album_id,
-        photo_file=photo_file
+        photo_file=photo_file,
+        user=user
     )
 
 
@@ -78,11 +82,13 @@ async def update_album(
 async def delete_album(
     album_id: int,
     album_service: Annotated[AlbumService, Depends(get_album_service)],
+    user: Annotated[UserOut, Depends(get_current_active_auth_user)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
 ) -> None:
     return await album_service.delete_album(
         session=session,
-        album_id=album_id
+        album_id=album_id,
+        user=user
     )
 
 

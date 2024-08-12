@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
+from auth.schemas import UserOut
 from auth.utils import hash_password
 from auth.custom_exceptions import (
     UserCreateException,
@@ -18,12 +20,17 @@ class AbstractRepository(ABC):
     
     @staticmethod
     @abstractmethod
-    def get_user_by_email():
+    async def get_user_by_email():
         raise NotImplementedError
     
     @staticmethod
     @abstractmethod
-    def get_all_users():
+    async def get_all_users():
+        raise NotImplementedError
+    
+    @staticmethod
+    @abstractmethod
+    async def delete_user_account():
         raise NotImplementedError
 
 
@@ -67,15 +74,36 @@ class UserRepository(AbstractRepository):
     ) -> list[User]:
         stmt = (
             select(User)
-            .filter_by(id=user_id)
-            .options(selectinload(User.albums).selectinload(Album.songs))
+            .options(
+                selectinload(User.albums).selectinload(Album.songs)
+            )
             .offset(skip)
             .limit(limit)
             .order_by(User.id)
         )
-        users: list[User] = await session.scalars(stmt)
+
+        if user_id is not None:
+            stmt = stmt.filter_by(id=user_id)
+        
+        users = await session.scalars(stmt)
         return users.all()
 
+
+    @staticmethod
+    async def delete_user_account(
+        session: AsyncSession,
+        user: UserOut
+    ) -> None:
+        user_to_delete: User = await session.get(User, user.id)
+        try:
+            await session.delete(user_to_delete)
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Can not delete user"
+            )
 
 # Зависимость для получения репозитория 
 def get_user_repository() -> UserRepository:

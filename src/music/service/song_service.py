@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
+from auth.schemas import UserOut
 from aws.s3_actions import S3Client
 from music.enums import Genre
 from music.schemas import SongIn, SongOut, SongUpdate, Files
@@ -8,6 +9,7 @@ from database.models import Song
 from music.repository.song_repository import SongRepository, get_song_repository
 from music.constants import MUSIC, SONGS, IMAGES
 from music.service.mixins.file_action_mixin import FileActionMixin
+from music.utils import check_user_role
 
 
 class AbstractSongService(ABC):
@@ -43,11 +45,12 @@ class SongService(AbstractSongService, FileActionMixin):
         return [SongOut.model_validate(song, from_attributes=True) for song in songs]
     
     @staticmethod
+    @check_user_role
     async def create_song(
         session: AsyncSession,
         name: str,
         genre: Genre,
-        artist_id: int,
+        user: UserOut,
         album_id: int,
         song_file: UploadFile,
         photo_file: UploadFile,
@@ -63,7 +66,7 @@ class SongService(AbstractSongService, FileActionMixin):
         song_in = SongIn(
             name=name,
             genre=genre,
-            artist_id=artist_id,
+            artist_id=user.id,
             album_id=album_id,
             file_url=song_url_key,
             photo_url=photo_url_key,
@@ -73,8 +76,10 @@ class SongService(AbstractSongService, FileActionMixin):
         return Files(song_filename=song_filename, photo_filename=photo_filename)
 
     @staticmethod
+    @check_user_role
     async def update_song(
         session: AsyncSession,
+        user: UserOut,
         song_id: int,
         name: str | None = None,
         genre: Genre | None = None,
@@ -107,8 +112,10 @@ class SongService(AbstractSongService, FileActionMixin):
         return Files(song_filename=song_filename, photo_filename=photo_filename)
 
     @staticmethod
+    @check_user_role
     async def delete_song(
         session: AsyncSession,
+        user: UserOut,
         song_id: int,
         song_repository: SongRepository = get_song_repository(),
     ) -> None:

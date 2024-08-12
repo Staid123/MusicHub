@@ -8,6 +8,7 @@ from auth.repository import (
 from sqlalchemy.ext.asyncio import AsyncSession
 from auth.schemas import UserIn, UserOut
 from auth.custom_exceptions import UserCreateException
+from music.service.album_service import AlbumService, get_album_service
 
 
 class AbstractUserService(ABC):
@@ -26,12 +27,16 @@ class AbstractUserService(ABC):
     async def list_users():
         raise NotImplementedError
 
-    
     @staticmethod
     @abstractmethod
-    async def check_user_is_admin():
+    async def check_user_role():
         raise NotImplementedError
 
+    @staticmethod
+    @abstractmethod
+    async def delete_user_account():
+        raise NotImplementedError
+    
 
 class UserService(AbstractUserService):
     @staticmethod
@@ -93,6 +98,22 @@ class UserService(AbstractUserService):
         )
         return str(user.role)
     
+
+    @staticmethod
+    async def delete_user_account(
+        session: AsyncSession,
+        user: UserOut,
+        user_repository: UserRepository = get_user_repository(),
+        album_service: AlbumService = get_album_service()
+    ) -> None:
+        for album in user.albums:
+            await album_service.delete_album(
+                session=session, 
+                album_id=album.id,
+                user=user
+            )
+        await user_repository.delete_user_account(session=session, user=user)
+
 
 # Зависимость для получения сервиса
 def get_user_service() -> UserService:

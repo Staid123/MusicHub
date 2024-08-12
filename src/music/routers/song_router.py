@@ -2,6 +2,8 @@ import logging
 from typing import Annotated, Any
 from fastapi import APIRouter, Depends, File, Form, Response, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from auth.schemas import UserOut
+from auth.validation import get_current_active_auth_user
 from music.constants import SONGS
 from music.enums import Genre
 from music.schemas import Files, SongOut
@@ -37,7 +39,7 @@ async def get_all_songs(
 async def create_song(
     name: Annotated[str, Form()],
     genre: Annotated[Genre, Form()],
-    artist_id: Annotated[int, Form(gt=0)],
+    user: Annotated[UserOut, Depends(get_current_active_auth_user)],
     album_id: Annotated[int, Form(gt=0)],
     song_file: Annotated[UploadFile, File(...)],
     photo_file: Annotated[UploadFile, File(...)],
@@ -48,7 +50,7 @@ async def create_song(
         session=session,
         name=name,
         genre=genre,
-        artist_id=artist_id,
+        user=user,
         album_id=album_id,
         song_file=song_file,
         photo_file=photo_file
@@ -59,6 +61,7 @@ async def create_song(
 async def update_song(
     song_id: int,
     song_service: Annotated[SongService, Depends(get_song_service)],
+    user: Annotated[UserOut, Depends(get_current_active_auth_user)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
     name: str | None = Form(default=None),
     genre: Genre | None = Form(default=None),
@@ -71,19 +74,22 @@ async def update_song(
         name=name,
         genre=genre,
         song_file=song_file,
-        photo_file=photo_file
+        photo_file=photo_file,
+        user=user
     )
 
 
 @router.delete("/{song_id}/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_song(
     song_id: int,
+    user: Annotated[UserOut, Depends(get_current_active_auth_user)],
     song_service: Annotated[SongService, Depends(get_song_service)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
 ) -> None:
     return await song_service.delete_song(
         song_id=song_id,
-        session=session
+        session=session,
+        user=user
     )
 
 

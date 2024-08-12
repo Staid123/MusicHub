@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import ConfigDict, BaseModel
 
 from auth.schemas import UserBase
@@ -23,6 +24,8 @@ class SongOut(SongIn):
     id: int
     artist: "UserBase"
     album: "AlbumBase"
+    created_at: datetime
+    updated_at: datetime
 
 
 class SongUpdate(BaseModel):
@@ -48,6 +51,8 @@ class AlbumOut(AlbumIn):
     id: int
     artist: "UserBase"
     songs: list["SongBase"]
+    created_at: datetime
+    updated_at: datetime
 
 
 class AlbumUpdate(BaseModel):

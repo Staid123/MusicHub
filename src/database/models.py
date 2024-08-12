@@ -1,4 +1,5 @@
-from sqlalchemy import Boolean, LargeBinary, ForeignKey, MetaData, UniqueConstraint
+from datetime import datetime
+from sqlalchemy import TIMESTAMP, Boolean, LargeBinary, ForeignKey, MetaData, UniqueConstraint, func
 from sqlalchemy.orm import (
     Mapped,
     DeclarativeBase,
@@ -42,6 +43,8 @@ class Song(Base):
     genre: Mapped["Genre"]
     artist_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     album_id: Mapped[int] = mapped_column(ForeignKey('album.id'))
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
     
     artist: Mapped["User"] = relationship('User', back_populates='songs')
     album: Mapped["Album"] = relationship('Album', back_populates='songs')
@@ -55,6 +58,8 @@ class Album(Base):
     name: Mapped[str]
     artist_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
     photo_url: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
  
     artist: Mapped["User"] = relationship('User', back_populates='albums')
     songs: Mapped[list["Song"]] = relationship('Song', back_populates='album')

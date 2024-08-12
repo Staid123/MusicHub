@@ -1,5 +1,4 @@
 from datetime import timedelta
-from auth.enums import Role
 from auth.schemas import UserIn
 from auth.utils import encode_jwt
 from config import settings

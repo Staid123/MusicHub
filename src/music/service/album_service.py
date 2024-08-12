@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
+from auth.enums import Role
+from auth.schemas import UserOut
 from aws.s3_actions import S3Client
 from music.repository.song_repository import SongRepository, get_song_repository
 from music.schemas import AlbumIn, AlbumOut, AlbumUpdate, Files
@@ -8,6 +10,8 @@ from database.models import Album
 from music.repository.album_repository import AlbumRepository, get_album_repository
 from music.constants import ALBUMS, IMAGES
 from music.service.mixins.file_action_mixin import FileActionMixin
+from auth.custom_exceptions import not_enough_rights_exception
+from music.utils import check_user_role
 
 
 class AbstractAlbumService(ABC):
@@ -42,11 +46,13 @@ class AlbumService(AbstractAlbumService, FileActionMixin):
         albums: list[Album] = await album_repository.get_albums(session=session, **filters)
         return [AlbumOut.model_validate(album, from_attributes=True) for album in albums]
     
+    
     @staticmethod
+    @check_user_role
     async def create_album(
         session: AsyncSession,
         name: str,
-        artist_id: int,
+        user: UserOut,
         photo_file: UploadFile,
         album_repository: AlbumRepository = get_album_repository(),
     ) -> Files:
@@ -57,7 +63,7 @@ class AlbumService(AbstractAlbumService, FileActionMixin):
 
         album_in = AlbumIn(
             name=name,
-            artist_id=artist_id,
+            artist_id=user.id,
             photo_url=photo_url_key,
         )
 
@@ -66,8 +72,10 @@ class AlbumService(AbstractAlbumService, FileActionMixin):
 
 
     @staticmethod
+    @check_user_role
     async def update_album(
         album_id: int,
+        user: UserOut,
         session: AsyncSession,
         name: str | None = None,
         photo_file: UploadFile | None = None,
@@ -92,12 +100,14 @@ class AlbumService(AbstractAlbumService, FileActionMixin):
 
 
     @staticmethod
+    @check_user_role
     async def delete_album(
         session: AsyncSession,
         album_id: int,
+        user: UserOut,
         album_repository: AlbumRepository = get_album_repository(),
         song_repository: SongRepository = get_song_repository()
-    ) -> None:
+    ) -> None:        
         album: AlbumOut = await album_repository.get_album_by_id(session=session, album_id=album_id)
         
         async with S3Client() as s3_client:

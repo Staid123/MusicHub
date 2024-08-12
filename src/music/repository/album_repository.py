@@ -11,6 +11,11 @@ from music.schemas import AlbumIn, AlbumOut, AlbumUpdate
 class AbstractRepository(ABC):
     @staticmethod
     @abstractmethod
+    async def get_album_by_id():
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
     async def get_albums():
         raise NotImplementedError
 

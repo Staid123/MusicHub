@@ -145,6 +145,7 @@ def get_current_active_auth_user(
 def get_current_active_auth_user_admin(
     user: Annotated[UserOut, Depends(get_current_active_auth_user)]
 ) -> UserOut:
-    if user.role == Role.ADMIN:
+    result: bool = user.role == Role.ADMIN
+    if result:
         return user
     raise not_enough_rights_exception
