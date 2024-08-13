@@ -27,6 +27,13 @@ class AuthJWT(BaseModel):
     refresh_token_expire_days: int = 30
 
 
+class SMTPSettings(BaseModel):
+    user: str
+    password: str
+    host: str
+    port: str
+
+
 class AWSSettings(BaseModel):
     bucket_name: str
 
@@ -40,5 +47,7 @@ class Settings(BaseSettings):
     auth_jwt: AuthJWT = AuthJWT()
     db: PostgresDatabaseURL
     aws: AWSSettings
+    smtp: SMTPSettings
+
 
 settings: Settings = Settings()
