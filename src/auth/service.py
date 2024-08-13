@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from auth.enums import Role
 from database.models import User
 from auth.repository import (
     UserRepository, 
@@ -9,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from auth.schemas import UserIn, UserOut
 from auth.custom_exceptions import UserCreateException
 from music.service.album_service import AlbumService, get_album_service
+from music.tasks import send_email_message_after_register_or_login
 
 
 class AbstractUserService(ABC):
@@ -50,6 +50,10 @@ class UserService(AbstractUserService):
                 session=session,
                 **user_in.model_dump()
             )
+            send_email_message_after_register_or_login.delay(
+                username=user_in.username, 
+                email=user_in.email
+            )
             return new_user_id
         except UserCreateException as ex:
             return f"{ex}: failure to create new user"
@@ -65,6 +69,10 @@ class UserService(AbstractUserService):
             email=email
         )
         if user:
+            send_email_message_after_register_or_login.delay(
+                username=user.username, 
+                email=user.email
+            )
             return UserOut.model_validate(obj=user, from_attributes=True)
         return None
     
