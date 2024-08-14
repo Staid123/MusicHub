@@ -1,6 +1,6 @@
 import logging
 from typing import Annotated, Any
-from fastapi import APIRouter, Depends, File, Form, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from auth.schemas import UserOut
 from auth.validation import get_current_active_auth_user
@@ -48,13 +48,16 @@ async def create_album(
     album_service: Annotated[AlbumService, Depends(get_album_service)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
 ) -> Files:
-    return await album_service.create_album(
-        session=session,
-        name=name,
-        user=user,
-        photo_file=photo_file
-    )
-
+    try:
+        return await album_service.create_album(
+            session=session,
+            name=name,
+            user=user,
+            photo_file=photo_file
+        )
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.patch(
     "/{album_id}/", 

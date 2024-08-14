@@ -65,7 +65,7 @@ class S3Client:
         if not 0 < size <= max_file_size:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f'Supported {file_type} file size is 0 - {max_file_size} MB'
+                detail=f'Supported {file_type} file size is 0 - {max_file_size} KB'
             )
 
         logging.info(f'Uploading {key} to s3')

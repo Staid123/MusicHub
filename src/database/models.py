@@ -30,7 +30,7 @@ class User(Base):
     email: Mapped[str]
     password_hash: Mapped[bytes] = mapped_column(LargeBinary)
     active: Mapped[bool] = mapped_column(Boolean, default=True, server_default='true')
-    role: Mapped["Role"] = mapped_column(default=Role.GUEST, server_default="guest")
+    role: Mapped["Role"] = mapped_column(default=Role.GUEST)
 
     songs: Mapped[list["Song"]] = relationship('Song', back_populates='artist')
     albums: Mapped[list["Album"]] = relationship('Album', back_populates='artist')

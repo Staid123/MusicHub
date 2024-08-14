@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
-from auth.enums import Role
 from auth.schemas import UserOut
 from aws.s3_actions import S3Client
 from music.repository.song_repository import SongRepository, get_song_repository
@@ -10,7 +9,6 @@ from database.models import Album
 from music.repository.album_repository import AlbumRepository, get_album_repository
 from music.constants import ALBUMS, IMAGES
 from music.service.mixins.file_action_mixin import FileActionMixin
-from auth.custom_exceptions import not_enough_rights_exception
 from music.utils import check_user_role
 
 

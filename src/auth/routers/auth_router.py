@@ -61,7 +61,6 @@ async def create_user_handler(
     # If the user exists raise HTTPException
     if user:
         logger.warning(f"Attempted to create a user with an email that already exists: {user_in.email}")
-        return user
         raise user_already_exists_exception
     try:
         # Create user using service for user
@@ -95,11 +94,11 @@ async def login_handler(
         session=session, 
         user_in=user
     )
+    if role == str(Role.GUEST):
+        role = str(Role.USER)
     # Create access and refresh token using email
     access_token = create_access_token(user, role=role)
     refresh_token = create_refresh_token(user)
-    # with ProducerAuthorization() as producer_auth:
-    #     producer_auth.send_user_object_and_token_to_services(access_token, user)
 
     logger.info(f"User '{user.username}' successfully logged in.")
 
