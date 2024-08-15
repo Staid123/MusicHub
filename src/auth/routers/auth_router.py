@@ -96,7 +96,8 @@ async def login_handler(
     )
     if role == str(Role.GUEST):
         # user.role = Role.USER
-        user.role = Role.ARTIST
+        # user.role = Role.ARTIST
+        user.role = Role.ADMIN
         await user_service.change_user_role(
             user_in=user,
             session=session,

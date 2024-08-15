@@ -24,7 +24,10 @@ Base.metadata.bind = engine_test
 
 async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            await session.close()  # Закрытие сессии после использования
 
 app.dependency_overrides[db_helper.session_getter] = override_get_async_session
 
@@ -37,6 +40,7 @@ async def prepare_database():
         logging.info("CREATING DATABASE")
         await conn.run_sync(Base.metadata.create_all)
     yield
+    await engine_test.dispose()
     # async with engine_test.begin() as conn:
     #     logging.info("DELETING DATABASE")
     #     await conn.run_sync(Base.metadata.drop_all)
@@ -47,7 +51,10 @@ client = TestClient(app)
 async def ac() -> AsyncGenerator[AsyncClient, None]:
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
-        yield ac
+        try:
+            yield ac
+        finally:
+            await ac.aclose()  # Закрытие асинхронного клиента после использования
 
 @pytest.fixture(scope="session")
 def register_user():
