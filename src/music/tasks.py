@@ -5,7 +5,7 @@ from config import settings
 from email.message import EmailMessage
 
 
-celery_app = Celery('notifications', broker='redis://redis:6379/0')
+celery_app = Celery('notifications', broker='redis://localhost:6379/0')
 
 
 def get_email_template_dashboard(username, email):

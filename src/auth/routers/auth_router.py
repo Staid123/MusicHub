@@ -95,9 +95,14 @@ async def login_handler(
         user_in=user
     )
     if role == str(Role.GUEST):
-        role = str(Role.USER)
+        # user.role = Role.USER
+        user.role = Role.ARTIST
+        await user_service.change_user_role(
+            user_in=user,
+            session=session,
+        )
     # Create access and refresh token using email
-    access_token = create_access_token(user, role=role)
+    access_token = create_access_token(user, role=str(user.role))
     refresh_token = create_refresh_token(user)
 
     logger.info(f"User '{user.username}' successfully logged in.")

@@ -8,3 +8,4 @@ __pycache__/
 .env_minio
 certs/
 .pytest_cache
+.env_test_db

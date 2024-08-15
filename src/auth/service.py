@@ -73,7 +73,8 @@ class UserService(AbstractUserService):
                 username=user.username, 
                 email=user.email
             )
-            return UserOut.model_validate(obj=user, from_attributes=True)
+            user_schema = UserOut.model_validate(obj=user, from_attributes=True)
+            return user_schema
         return None
     
 
@@ -97,7 +98,7 @@ class UserService(AbstractUserService):
 
     @staticmethod
     async def check_user_role(
-        user_in: UserIn,
+        user_in: UserOut,
         session: AsyncSession,
     ) -> str:
         user = await UserService.get_user_by_email(
@@ -105,6 +106,17 @@ class UserService(AbstractUserService):
             email=user_in.email
         )
         return str(user.role)
+    
+    @staticmethod
+    async def change_user_role(
+        user_in: UserOut,
+        session: AsyncSession,
+        user_repository: UserRepository = get_user_repository()
+    ) -> str:
+        await user_repository.change_user_role(
+            session=session, 
+            user_in=user_in,
+        )
     
 
     @staticmethod

@@ -95,7 +95,7 @@ async def delete_album(
     )
 
 
-@router.get("/download", description="Enter only file name without folders")
+@router.get("/download/", description="Enter only file name without folders")
 async def download_album_photo(
     file_name: str,
     album_service: Annotated[AlbumService, Depends(get_album_service)],

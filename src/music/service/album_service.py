@@ -109,6 +109,7 @@ class AlbumService(AbstractAlbumService, FileActionMixin):
         album: AlbumOut = await album_repository.get_album_by_id(session=session, album_id=album_id)
         
         async with S3Client() as s3_client:
+            # print("INSIDE ALBUM SERVICE DELETE FUNCTION. ALBUM PHOTO URL = ", album.photo_url)
             await AlbumService._delete_file(s3_client, album.photo_url)
 
         for song in album.songs:
