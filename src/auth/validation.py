@@ -9,7 +9,7 @@ from auth.utils import (
     validate_password,
     decode_jwt
 )
-from database import db_helper_test, db_helper
+from database import db_helper #, db_helper_test, 
 from auth.schemas import UserOut
 from sqlalchemy.orm import Session
 from auth.custom_exceptions import (
@@ -109,8 +109,8 @@ async def get_user_by_token_sub(
         raise token_not_found_exception
 
     user: UserOut = await user_service.get_user_by_email(
-        # session=db_helper.session_factory(), 
-        session=db_helper_test.session_factory(),
+        session=db_helper.session_factory(), 
+        # session=db_helper_test.session_factory(),
         email=email
     )
     

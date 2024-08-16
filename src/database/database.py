@@ -41,6 +41,6 @@ db_helper = DatabaseHelper(
     url=str(settings.db.url)
 )
 
-db_helper_test = DatabaseHelper(
-    url=str(settings.db_test.url)
-)
+# db_helper_test = DatabaseHelper(
+#     url=str(settings.db_test.url)
+# )

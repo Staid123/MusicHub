@@ -1,31 +1,31 @@
 name: music-hub
 services:
-  # music_fastapi:
-  #   container_name: music_fastapi
-  #   build: 
-  #     context: .
-  #   ports:
-  #     - 8000:8000
-  #   depends_on:
-  #     - music_database
-  #   env_file:
-  #     - ./.env
+  music_fastapi:
+    container_name: music_fastapi
+    build: 
+      context: .
+    ports:
+      - 8000:8000
+    depends_on:
+      - music_database
+    env_file:
+      - ./.env_aws
 
-  # music_database:
-  #   image: postgres:latest
-  #   container_name: music_database
-  #   env_file:
-  #     - ./.env_db
-  #   ports:
-  #     - "65400:5432"
-  #   volumes:
-  #     - postgres_music_database:/var/lib/postgresql/data/
+  music_database:
+    image: postgres:latest
+    container_name: music_database
+    env_file:
+      - ./.env_db
+    ports:
+      - "65400:5432"
+    volumes:
+      - postgres_music_database:/var/lib/postgresql/data/
       
   test_database:
     image: postgres:latest
     container_name: test_database
     env_file:
-      - ./.env
+      - ./.env_test_db
     ports:
       - "65401:5432"
     volumes:
@@ -40,45 +40,44 @@ services:
     ports:
       - "5050:80"
     depends_on:
-      # - music_database
+      - music_database
       - test_database
 
   redis:
     container_name: redis
     image: redis:7.0.5-alpine
+    hostname: redis
+
+
+  worker:
+    build: .
+    container_name: worker
+    hostname: worker
+    entrypoint: celery
+    command: -A music.tasks.celery_app worker --loglevel=info
+    volumes:
+      - ./music:/music
+    links:
+      - redis
+    depends_on:
+      - redis
+      - music_database
+
+  flower:
+    build: .
+    container_name: flower
+    hostname: flower
+    entrypoint: celery
+    command: -A music.tasks.celery_app flower
+    volumes:
+      - ./music:/music
+    links:
+      - redis
+    depends_on:
+      - redis
     ports:
-      - "6379:6379"
-
-
-  # worker:
-  #   build: .
-  #   container_name: worker
-  #   hostname: worker
-  #   entrypoint: celery
-  #   command: -A music.tasks.celery_app worker --loglevel=info
-  #   volumes:
-  #     - ./music:/music
-  #   links:
-  #     - redis
-  #   depends_on:
-  #     - redis
-  #     - test_database
-
-  # flower:
-  #   build: .
-  #   container_name: flower
-  #   hostname: flower
-  #   entrypoint: celery
-  #   command: -A music.tasks.celery_app flower
-  #   volumes:
-  #     - ./music:/music
-  #   links:
-  #     - redis
-  #   depends_on:
-  #     - redis
-  #   ports:
-  #     - "5555:5555"
+      - "5555:5555"
 
 volumes:
-  # postgres_music_database:
+  postgres_music_database:
   postgres_test_database:
