@@ -1,5 +1,3 @@
-import asyncio
-from http.client import HTTPException
 import logging
 from typing import AsyncGenerator
 
@@ -9,7 +7,6 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import NullPool
 
-from auth.schemas import TokenInfo
 from database import db_helper
 from config import settings
 from database.models import Base
