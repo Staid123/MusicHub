@@ -1,14 +1,13 @@
-from conftest import client
 import logging
 
 file = {'photo_file': ('doberman1.jpg', open(r"D:\Projects\s3-training\doberman1.jpg", 'rb'))}
 file_name = None
 
 
-def test_create_album(login_user):
+async def test_create_album(ac, login_user):
     logging.info("TOKEN BEFORE SENDING TO ENDPOINT: %s", login_user['access_token'])
     headers = {"Authorization": f"Bearer {login_user['access_token']}"}
-    response = client.post(
+    response = await ac.post(
         url="/album/",
         headers=headers,
         data={"name": "album_name"},
@@ -22,10 +21,10 @@ def test_create_album(login_user):
     logging.info("Test 'create_album' was successful")
 
 
-def test_get_list_albums(login_user):
+async def test_get_list_albums(ac, login_user):
     fields = ["name", "artist_id", "photo_url", "id", "artist", "songs", "created_at", "updated_at"]
     headers = {"Authorization": f"Bearer {login_user['access_token']}"}
-    response = client.get(
+    response = await ac.get(
         url="/album/",
         headers=headers,
         # json={"name": "album_name"},
@@ -44,9 +43,9 @@ def test_get_list_albums(login_user):
     logging.info("Test 'get_list_albums' was successful")
 
 
-def test_update_album(login_user):
+async def test_update_album(ac, login_user):
     headers = {"Authorization": f"Bearer {login_user['access_token']}"}
-    response = client.patch(
+    response = await ac.patch(
         url="/album/1/",
         headers=headers,
         data={"name": "album_name1"},
@@ -64,8 +63,8 @@ def test_update_album(login_user):
     logging.info("Test 'update_album' was successful")
 
 
-def test_download_album_photo():
-    response = client.get(
+async def test_download_album_photo(ac, ):
+    response = await ac.get(
         url="/album/download/",
         params={"file_name": file_name}
     )
@@ -85,9 +84,9 @@ song_filename = None
 photo_filename = None
 
 
-def test_create_song(login_user):
+async def test_create_song(ac, login_user):
     headers = {"Authorization": f"Bearer {login_user['access_token']}"}
-    response = client.post(
+    response = await ac.post(
         url="/music/",
         headers=headers,
         data={
@@ -118,9 +117,9 @@ def test_create_song(login_user):
     logging.info("Test 'test_create_song' was successful")
 
 
-def test_get_all_songs(login_user):
+async def test_get_all_songs(ac, login_user):
     headers = {"Authorization": f"Bearer {login_user['access_token']}"}
-    response = client.get(
+    response = await ac.get(
         url="/music/",
         headers=headers
     )
@@ -145,9 +144,9 @@ def test_get_all_songs(login_user):
     logging.info("Test 'get_all_songs' was successful")
 
 
-def test_update_song(login_user):
+async def test_update_song(ac, login_user):
     headers = {"Authorization": f"Bearer {login_user['access_token']}"}
-    response = client.patch(
+    response = await ac.patch(
         url="/music/1/",
         headers=headers,
         data={
@@ -174,9 +173,9 @@ def test_update_song(login_user):
     logging.info("Test 'update_song' was successful")
 
 
-def test_delete_song(login_user):
+async def test_delete_song(ac, login_user):
     headers = {"Authorization": f"Bearer {login_user['access_token']}"}
-    response = client.delete(
+    response = await ac.delete(
         url="/music/1/",
         headers=headers
     )
@@ -197,9 +196,9 @@ def test_delete_song(login_user):
     logging.info("Test 'delete_song' was successful")
 
 
-def test_delete_album(login_user):
+async def test_delete_album(ac, login_user):
     headers = {"Authorization": f"Bearer {login_user['access_token']}"}
-    response = client.delete(
+    response = await ac.delete(
         url="/album/1/",
         headers=headers
     )

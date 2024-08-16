@@ -1,10 +1,9 @@
 import logging
-from conftest import client
 
 
-def test_auth_user_check_self_info(login_user):
+async def test_auth_user_check_self_info(ac, login_user):
     headers = {"Authorization": f"Bearer {login_user['access_token']}"}
-    response = client.get(
+    response = await ac.get(
         url="/jwt/users/me/",
         headers=headers
     )
@@ -18,9 +17,9 @@ def test_auth_user_check_self_info(login_user):
     logging.info("Test 'auth_user_check_self_info' was successful")
 
 
-def test_get_list_users(login_user):
+async def test_get_list_users(ac, login_user):
     headers = {"Authorization": f"Bearer {login_user['access_token']}"}
-    response = client.get(
+    response = await ac.get(
         url="/jwt/users/all/",
         headers=headers
     )
@@ -35,9 +34,9 @@ def test_get_list_users(login_user):
     logging.info("Test 'get_list_users' was successful")
 
 
-def test_delete_account(login_user):
+async def test_delete_account(ac, login_user):
     headers = {"Authorization": f"Bearer {login_user['access_token']}"}
-    response = client.delete(
+    response = await ac.delete(
         url="/jwt/users/delete/account/",
         headers=headers
     )

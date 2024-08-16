@@ -57,8 +57,8 @@ async def ac() -> AsyncGenerator[AsyncClient, None]:
             await ac.aclose()  # Закрытие асинхронного клиента после использования
 
 @pytest.fixture(scope="session")
-def register_user():
-    response = client.post(
+async def register_user(ac):
+    response = await ac.post(
         url="/jwt/auth/signup/",
         json={
             "username": "staiddd",
@@ -72,8 +72,8 @@ def register_user():
 
 
 @pytest.fixture(scope="function")
-def login_user(register_user):
-    response = client.post(
+async def login_user(register_user, ac):
+    response = await ac.post(
         url="/jwt/auth/login/",
         data={
             "username": register_user["user"]["email"],
