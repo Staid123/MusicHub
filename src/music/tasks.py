@@ -1,8 +1,11 @@
-from celery import Celery
-import smtplib
 import logging
-from config import settings
+import smtplib
 from email.message import EmailMessage
+
+from celery import Celery
+
+from config import settings
+
 
 
 celery_app = Celery('notifications', broker='redis://redis:6379/0')
