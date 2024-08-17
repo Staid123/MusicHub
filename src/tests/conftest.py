@@ -1,12 +1,12 @@
 import logging
 from typing import AsyncGenerator
 
+from celery import Celery
 import pytest
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import NullPool
-
 from database import db_helper
 from config import settings
 from database.models import Base
@@ -19,6 +19,7 @@ engine_test = create_async_engine(DATABASE_URL_TEST, poolclass=NullPool)
 async_session_maker = async_sessionmaker(engine_test, class_=AsyncSession, expire_on_commit=False)
 Base.metadata.bind = engine_test
 
+
 async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
         try:
@@ -27,6 +28,7 @@ async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
             await session.close()  # Закрытие сессии после использования
 
 app.dependency_overrides[db_helper.session_getter] = override_get_async_session
+app.dependency_overrides[db_helper.session_factory] = async_session_maker
 
 @pytest.fixture(autouse=True, scope='session')
 async def prepare_database():
