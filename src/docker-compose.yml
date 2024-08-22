@@ -21,15 +21,15 @@ services:
     volumes:
       - postgres_music_database:/var/lib/postgresql/data/
       
-  test_database:
-    image: postgres:latest
-    container_name: test_database
-    env_file:
-      - ./.env_test_db
-    ports:
-      - "65401:5432"
-    volumes:
-      - postgres_test_database:/var/lib/postgresql/data/
+  # test_database:
+  #   image: postgres:latest
+  #   container_name: test_database
+  #   env_file:
+  #     - ./.env_test_db
+  #   ports:
+  #     - "65401:5432"
+  #   volumes:
+  #     - postgres_test_database:/var/lib/postgresql/data/
 
   pgadmin:
     image: dpage/pgadmin4
@@ -41,12 +41,14 @@ services:
       - "5050:80"
     depends_on:
       - music_database
-      - test_database
+      # - test_database
 
   redis:
     container_name: redis
     image: redis:7.0.5-alpine
     hostname: redis
+    ports:
+      - "6379:6379"
 
 
   worker:
@@ -80,4 +82,4 @@ services:
 
 volumes:
   postgres_music_database:
-  postgres_test_database:
+  # postgres_test_database:

@@ -25,13 +25,13 @@ class PostgresDatabaseSettings(BaseModel):
         "pk": "pk_%(table_name)s",
     }
 
-class PostgresTestDatabaseSettings(BaseModel):
-    host: str
-    port: int
-    name: str
-    user: str
-    password: str
-    url: str
+# class PostgresTestDatabaseSettings(BaseModel):
+#     host: str
+#     port: int
+#     name: str
+#     user: str
+#     password: str
+#     url: str
 
 
 class AuthJWT(BaseModel):
@@ -54,6 +54,13 @@ class AWSSettings(BaseModel):
     bucket_name: str
 
 
+class RedisSettings(BaseModel):
+    host: str
+    port: str
+    first_db: str
+    second_db: str
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -64,7 +71,8 @@ class Settings(BaseSettings):
     db: PostgresDatabaseSettings
     aws: AWSSettings
     smtp: SMTPSettings
-    db_test: PostgresTestDatabaseSettings
+    redis: RedisSettings
+    # db_test: PostgresTestDatabaseSettings
 
 
 settings: Settings = Settings()
