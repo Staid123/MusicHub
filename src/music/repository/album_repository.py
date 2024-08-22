@@ -37,10 +37,10 @@ class AbstractRepository(ABC):
 
 class AlbumRepository(AbstractRepository):
     @staticmethod
-    async def get_album_by_id(
+    async def _get_album_with_options(
         session: AsyncSession,
         album_id: int
-    ) -> Album | None:
+    ) -> Album:
         stmt = (
             select(Album)
             .options(
@@ -49,8 +49,18 @@ class AlbumRepository(AbstractRepository):
             )
             .filter_by(id=album_id)
         )
-        result = await session.scalars(stmt)
-        album: Album = result.one_or_none()
+        album_with_options: Album = await session.scalars(stmt)
+        return album_with_options.one()
+
+    @staticmethod
+    async def get_album_by_id(
+        session: AsyncSession,
+        album_id: int
+    ) -> Album | None:
+        album = await AlbumRepository._get_album_with_options(
+            session=session, 
+            album_id=album_id
+        )
         if album:
            return album
         raise HTTPException(
@@ -88,7 +98,10 @@ class AlbumRepository(AbstractRepository):
             album = Album(**album_in.model_dump())
             session.add(album)
             await session.commit()
-            return album
+            return await AlbumRepository._get_album_with_options(
+                session=session, 
+                album_id=album.id
+            )
         except Exception:
             await session.rollback()
             raise HTTPException(
@@ -110,7 +123,10 @@ class AlbumRepository(AbstractRepository):
             for name, value in album_update.model_dump(exclude_none=True).items():
                 setattr(album, name, value)
             await session.commit()
-            return album
+            return await AlbumRepository._get_album_with_options(
+                session=session, 
+                album_id=album.id
+            )
         except Exception:
             await session.rollback()
             raise HTTPException(
