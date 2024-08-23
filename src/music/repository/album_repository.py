@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload, selectinload
 from database.models import Album
-from music.schemas import AlbumIn, AlbumOut, AlbumUpdate
+from music.schemas import AlbumIn, AlbumUpdate
 
 
 
@@ -50,7 +50,7 @@ class AlbumRepository(AbstractRepository):
             .filter_by(id=album_id)
         )
         album_with_options: Album = await session.scalars(stmt)
-        return album_with_options.one()
+        return album_with_options.one_or_none()
 
     @staticmethod
     async def get_album_by_id(
@@ -125,7 +125,7 @@ class AlbumRepository(AbstractRepository):
             await session.commit()
             return await AlbumRepository._get_album_with_options(
                 session=session, 
-                album_id=album.id
+                album_id=album_id
             )
         except Exception:
             await session.rollback()
