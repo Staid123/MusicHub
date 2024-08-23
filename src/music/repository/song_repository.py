@@ -31,11 +31,30 @@ class AbstractRepository(ABC):
 
 class SongRepository(AbstractRepository):
     @staticmethod
+    async def _get_song_with_options(
+        session: AsyncSession,
+        song_id: int
+    ) -> Song:
+        stmt = (
+            select(Song)
+            .options(
+                joinedload(Song.artist),
+                joinedload(Song.album)
+            )
+            .filter_by(id=song_id)
+        )
+        song_with_options: Song = await session.scalars(stmt)
+        return song_with_options.one_or_none()
+    
+    @staticmethod
     async def get_song_by_id(
         session: AsyncSession,
         song_id: int
     ) -> Song:
-        song: Song = await session.get(Song, song_id)
+        song: Song = await SongRepository._get_song_with_options(
+            session=session,
+            song_id=song_id
+        )
         if song:
            return song
         raise HTTPException(
@@ -73,7 +92,10 @@ class SongRepository(AbstractRepository):
             song = Song(**song_in.model_dump())
             session.add(song)
             await session.commit()
-            return song
+            return await SongRepository._get_song_with_options(
+                session=session,
+                song_id=song.id,
+            )
         except Exception:
             await session.rollback()
             raise HTTPException(
@@ -95,7 +117,7 @@ class SongRepository(AbstractRepository):
             for name, value in song_update.model_dump(exclude_none=True).items():
                 setattr(song, name, value)
             await session.commit()
-            return song
+            return await SongRepository._get_song_with_options(session=session, song_id=song_id)
         except Exception:
             await session.rollback()
             raise HTTPException(

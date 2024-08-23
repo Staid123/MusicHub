@@ -10,6 +10,7 @@ from music.schemas import Files, SongOut
 from database import db_helper
 from music.service.song_service import SongService, get_song_service
 from music.utils import get_music_filters
+from redis_cache import RedisCache, get_redis_helper
 
 
 # Logger setup
@@ -35,6 +36,26 @@ async def get_all_songs(
         **filters
     )
 
+
+@router.get("/{song_id}/", response_model=SongOut)
+async def get_song(
+    song_service: Annotated[SongService, Depends(get_song_service)],
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    redis_helper: Annotated[RedisCache, Depends(get_redis_helper)],
+    song_id: int,
+) -> SongOut:
+    if not (
+        song := await redis_helper.get(
+            key=f"song/{song_id}", 
+        )
+    ):
+        song = await song_service.get_song_by_id(
+            session=session,
+            song_id=song_id
+        )
+    return song
+
+
 @router.post("/", response_model=Files, status_code=status.HTTP_201_CREATED)
 async def create_song(
     name: Annotated[str, Form()],
@@ -45,9 +66,11 @@ async def create_song(
     photo_file: Annotated[UploadFile, File(...)],
     song_service: Annotated[SongService, Depends(get_song_service)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    redis_helper: Annotated[RedisCache, Depends(get_redis_helper)],
 ) -> Files:
     return await song_service.create_song(
         session=session,
+        redis_helper=redis_helper,
         name=name,
         genre=genre,
         user=user,
@@ -61,6 +84,7 @@ async def create_song(
 async def update_song(
     song_id: int,
     song_service: Annotated[SongService, Depends(get_song_service)],
+    redis_helper: Annotated[RedisCache, Depends(get_redis_helper)],
     user: Annotated[UserOut, Depends(get_current_active_auth_user)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
     name: str | None = Form(default=None),
@@ -70,6 +94,7 @@ async def update_song(
 ) -> Files:
     return await song_service.update_song(
         session=session,
+        redis_helper=redis_helper,
         song_id=song_id,
         name=name,
         genre=genre,
@@ -85,10 +110,12 @@ async def delete_song(
     user: Annotated[UserOut, Depends(get_current_active_auth_user)],
     song_service: Annotated[SongService, Depends(get_song_service)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    redis_helper: Annotated[RedisCache, Depends(get_redis_helper)],
 ) -> None:
     return await song_service.delete_song(
         song_id=song_id,
         session=session,
+        redis_helper=redis_helper,
         user=user
     )
 
