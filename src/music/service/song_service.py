@@ -10,6 +10,7 @@ from music.repository.song_repository import SongRepository, get_song_repository
 from music.constants import MUSIC, SONGS, IMAGES
 from music.service.mixins.file_action_mixin import FileActionMixin
 from music.utils import check_user_role
+from redis_cache import RedisCache
 
 
 class AbstractSongService(ABC):
@@ -45,6 +46,17 @@ class SongService(AbstractSongService, FileActionMixin):
         return [SongOut.model_validate(song, from_attributes=True) for song in songs]
     
     @staticmethod
+    async def get_song_by_id(
+        session: AsyncSession,
+        song_id: int,
+        song_repository: SongRepository = get_song_repository(),
+    ) -> SongOut:
+        return await song_repository.get_song_by_id(
+            session=session, 
+            song_id=song_id
+        )
+    
+    @staticmethod
     @check_user_role
     async def create_song(
         session: AsyncSession,
@@ -54,6 +66,7 @@ class SongService(AbstractSongService, FileActionMixin):
         album_id: int,
         song_file: UploadFile,
         photo_file: UploadFile,
+        redis_helper: RedisCache,
         song_repository: SongRepository = get_song_repository(),
     ) -> Files:
         song_filename, song_url_key = await SongService._generate_file_key(song_file, MUSIC, SONGS)
@@ -72,7 +85,9 @@ class SongService(AbstractSongService, FileActionMixin):
             photo_url=photo_url_key,
         )
 
-        await song_repository.create_song(session=session, song_in=song_in)
+        song: Song = await song_repository.create_song(session=session, song_in=song_in)
+        song_schema: SongOut = SongOut.model_validate(song, from_attributes=True)
+        await redis_helper.set(key=f"song/{song.id}", value=song_schema.model_dump())
         return Files(song_filename=song_filename, photo_filename=photo_filename)
 
     @staticmethod
@@ -81,6 +96,7 @@ class SongService(AbstractSongService, FileActionMixin):
         session: AsyncSession,
         user: UserOut,
         song_id: int,
+        redis_helper: RedisCache,
         name: str | None = None,
         genre: Genre | None = None,
         song_file: UploadFile | None = None,
@@ -108,7 +124,9 @@ class SongService(AbstractSongService, FileActionMixin):
             photo_url=photo_url_key or song_to_update.photo_url,
         )
         
-        await song_repository.update_song(session=session, song_id=song_id, song_update=song_update)
+        song: Song = await song_repository.update_song(session=session, song_id=song_id, song_update=song_update)
+        song_schema: SongOut = SongOut.model_validate(song, from_attributes=True)
+        await redis_helper.set(key=f"song/{song.id}", value=song_schema.model_dump())
         return Files(song_filename=song_filename, photo_filename=photo_filename)
 
     @staticmethod
@@ -116,6 +134,7 @@ class SongService(AbstractSongService, FileActionMixin):
     async def delete_song(
         session: AsyncSession,
         user: UserOut,
+        redis_helper: RedisCache,
         song_id: int,
         song_repository: SongRepository = get_song_repository(),
     ) -> None:
@@ -124,6 +143,8 @@ class SongService(AbstractSongService, FileActionMixin):
         async with S3Client() as s3_client:
             await SongService._delete_file(s3_client, song.file_url)
             await SongService._delete_file(s3_client, song.photo_url)
+
+        await redis_helper.delete(f"song/{song.id}")
 
         await song_repository.delete_song(session=session, song_id=song_id)
 

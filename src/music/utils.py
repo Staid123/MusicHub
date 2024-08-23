@@ -1,5 +1,5 @@
 from typing import Any, Optional
-
+import logging
 from fastapi import Query
 from auth.custom_exceptions import not_enough_rights_exception
 from auth.enums import Role
@@ -54,7 +54,7 @@ def get_album_filters(
 def check_user_role(func):
     async def wrapper(*args, **kwargs):
         user = kwargs.get("user")
-        print(user.role)
+        logging.info("User role in decorator: %s", user.role)
         if user.role not in (Role.ADMIN, Role.ARTIST):
             raise not_enough_rights_exception
         return await func(*args, **kwargs)

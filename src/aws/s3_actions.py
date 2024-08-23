@@ -69,7 +69,7 @@ class S3Client:
             )
 
         logging.info(f'Uploading {key} to s3')
-        s3_object = self.bucket.put_object(Key=key, Body=contents)
+        s3_object = self.bucket.put_object(Key=key, Body=contents)  
         if not s3_object:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -91,6 +91,7 @@ class S3Client:
                 ]
             }
         )
+        # print(response)
         if response['ResponseMetadata']['HTTPStatusCode'] != 200:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

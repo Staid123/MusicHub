@@ -9,6 +9,7 @@ from music.schemas import Files, AlbumOut
 from database import db_helper
 from music.service.album_service import AlbumService, get_album_service
 from music.utils import get_album_filters
+from redis_cache import RedisCache, get_redis_helper
 
 
 # Logger setup
@@ -35,6 +36,25 @@ async def get_list_albums(
     )
 
 
+@router.get("/{album_id}/", response_model=AlbumOut)
+async def get_album(
+    album_service: Annotated[AlbumService, Depends(get_album_service)],
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    redis_helper: Annotated[RedisCache, Depends(get_redis_helper)],
+    album_id: int,
+) -> AlbumOut:
+    if not (
+        album := await redis_helper.get(
+            key=f"album/{album_id}", 
+        )
+    ):
+        album = await album_service.get_album_by_id(
+            session=session,
+            album_id=album_id,
+        )
+    return album
+
+
 @router.post(
     "/",
     response_model=Files, 
@@ -47,10 +67,12 @@ async def create_album(
     photo_file: Annotated[UploadFile, File(...)],
     album_service: Annotated[AlbumService, Depends(get_album_service)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    redis_helper: Annotated[RedisCache, Depends(get_redis_helper)],
 ) -> Files:
     try:
         return await album_service.create_album(
             session=session,
+            redis_helper=redis_helper,
             name=name,
             user=user,
             photo_file=photo_file
@@ -69,6 +91,7 @@ async def update_album(
     user: Annotated[UserOut, Depends(get_current_active_auth_user)],
     album_service: Annotated[AlbumService, Depends(get_album_service)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    redis_helper: Annotated[RedisCache, Depends(get_redis_helper)],
     name: str | None = Form(default=None),
     photo_file: UploadFile | None = File(None),
 ) -> Files:
@@ -77,7 +100,8 @@ async def update_album(
         name=name,
         album_id=album_id,
         photo_file=photo_file,
-        user=user
+        user=user,
+        redis_helper=redis_helper
     )
 
 
@@ -87,15 +111,17 @@ async def delete_album(
     album_service: Annotated[AlbumService, Depends(get_album_service)],
     user: Annotated[UserOut, Depends(get_current_active_auth_user)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    redis_helper: Annotated[RedisCache, Depends(get_redis_helper)],
 ) -> None:
     return await album_service.delete_album(
         session=session,
         album_id=album_id,
-        user=user
+        user=user,
+        redis_helper=redis_helper
     )
 
 
-@router.get("/download", description="Enter only file name without folders")
+@router.get("/download/", description="Enter only file name without folders")
 async def download_album_photo(
     file_name: str,
     album_service: Annotated[AlbumService, Depends(get_album_service)],

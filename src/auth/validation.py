@@ -9,7 +9,7 @@ from auth.utils import (
     validate_password,
     decode_jwt
 )
-from database import db_helper
+from database import db_helper #, db_helper_test, 
 from auth.schemas import UserOut
 from sqlalchemy.orm import Session
 from auth.custom_exceptions import (
@@ -69,8 +69,8 @@ async def validate_auth_user(
 
     if not user.active:
         raise unactive_user_exception
-    
     logger.info(f"Login attempt with username: {user.username}")
+    logger.info("USER ROLE: %s", user.role)
     return user
 
 
@@ -92,6 +92,7 @@ def get_current_token_payload(
         payload = decode_jwt(
             token=token,
         )
+        logger.info("TOKEN %s", token)
     except InvalidTokenError:
         raise invalid_token_error
     return payload
@@ -103,12 +104,21 @@ async def get_user_by_token_sub(
     user_service: UserService = get_user_service(),
 ) -> UserOut:
     email: str | None = payload.get("sub")
+    if email is None:
+        logger.warning("Token payload does not contain 'sub'")
+        raise token_not_found_exception
+
     user: UserOut = await user_service.get_user_by_email(
         session=db_helper.session_factory(), 
+        # session=db_helper_test.session_factory(),
         email=email
     )
+    
     if user and user.active:
+        logger.info(f"User found by email: {email}")
         return user
+
+    logger.warning(f"User not found or inactive: {email}")
     raise token_not_found_exception
 
 
@@ -119,6 +129,7 @@ def get_auth_user_from_token_of_type(token_type: str):
         # получаем токен с заголовков
         payload: Annotated[dict, Depends(get_current_token_payload)]
     ) -> UserOut:
+        logger.debug(f"Validating token type: expected {token_type}, got {payload.get('type')}")
         # проверяем, совпадает ли введенный токен с токеном в заголовке
         await validate_token_type(payload=payload, token_type=token_type)
         # получаем данные по токену

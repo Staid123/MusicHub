@@ -105,6 +105,15 @@ class UserRepository(AbstractRepository):
                 detail="Can not delete user"
             )
 
+    @staticmethod
+    async def change_user_role(
+        session: AsyncSession,
+        user_in: UserOut,
+    ) -> User:
+        user: User = await session.get(User, user_in.id)
+        setattr(user, "role", user_in.role)
+        await session.commit()
+        
 # Зависимость для получения репозитория 
 def get_user_repository() -> UserRepository:
     return UserRepository

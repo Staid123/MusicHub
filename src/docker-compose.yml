@@ -8,9 +8,8 @@ services:
       - 8000:8000
     depends_on:
       - music_database
-    environment:
-      - AWS_ACCESS_KEY_ID=AKIAQKGGXORX6BLENMFB
-      - AWS_SECRET_ACCESS_KEY=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
+    env_file:
+      - ./.env_aws
 
   music_database:
     image: postgres:latest
@@ -48,6 +47,8 @@ services:
     container_name: redis
     image: redis:7.0.5-alpine
     hostname: redis
+    ports:
+      - "6379:6379"
 
 
   worker:

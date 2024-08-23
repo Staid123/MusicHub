@@ -10,6 +10,7 @@ from music.repository.album_repository import AlbumRepository, get_album_reposit
 from music.constants import ALBUMS, IMAGES
 from music.service.mixins.file_action_mixin import FileActionMixin
 from music.utils import check_user_role
+from redis_cache import RedisCache
 
 
 class AbstractAlbumService(ABC):
@@ -44,6 +45,17 @@ class AlbumService(AbstractAlbumService, FileActionMixin):
         albums: list[Album] = await album_repository.get_albums(session=session, **filters)
         return [AlbumOut.model_validate(album, from_attributes=True) for album in albums]
     
+
+    @staticmethod
+    async def get_album_by_id(
+        session: AsyncSession,
+        album_id: int,
+        album_repository: AlbumRepository = get_album_repository(),
+    ) -> AlbumOut:
+        return await album_repository.get_album_by_id(
+            session=session, 
+            album_id=album_id
+        )
     
     @staticmethod
     @check_user_role
@@ -52,6 +64,7 @@ class AlbumService(AbstractAlbumService, FileActionMixin):
         name: str,
         user: UserOut,
         photo_file: UploadFile,
+        redis_helper: RedisCache,
         album_repository: AlbumRepository = get_album_repository(),
     ) -> Files:
         photo_filename, photo_url_key = await AlbumService._generate_file_key(photo_file, IMAGES, ALBUMS)
@@ -65,7 +78,9 @@ class AlbumService(AbstractAlbumService, FileActionMixin):
             photo_url=photo_url_key,
         )
 
-        await album_repository.create_album(session=session, album_in=album_in)
+        album: Album = await album_repository.create_album(session=session, album_in=album_in)
+        album_schema: AlbumOut = AlbumOut.model_validate(album, from_attributes=True)
+        await redis_helper.set(key=f"album/{album.id}", value=album_schema.model_dump())
         return Files(photo_filename=photo_filename)
 
 
@@ -73,6 +88,7 @@ class AlbumService(AbstractAlbumService, FileActionMixin):
     @check_user_role
     async def update_album(
         album_id: int,
+        redis_helper: RedisCache,
         user: UserOut,
         session: AsyncSession,
         name: str | None = None,
@@ -93,7 +109,9 @@ class AlbumService(AbstractAlbumService, FileActionMixin):
             photo_url=photo_url_key or album_to_update.photo_url,
         )
         
-        await album_repository.update_album(session=session, album_id=album_id, album_update=album_update)
+        album: Album = await album_repository.update_album(session=session, album_id=album_id, album_update=album_update)
+        album_schema: AlbumOut = AlbumOut.model_validate(album, from_attributes=True)
+        await redis_helper.set(key=f"album/{album.id}", value=album_schema.model_dump())
         return Files(photo_filename=photo_filename)
 
 
@@ -102,6 +120,7 @@ class AlbumService(AbstractAlbumService, FileActionMixin):
     async def delete_album(
         session: AsyncSession,
         album_id: int,
+        redis_helper: RedisCache,
         user: UserOut,
         album_repository: AlbumRepository = get_album_repository(),
         song_repository: SongRepository = get_song_repository()
@@ -113,6 +132,8 @@ class AlbumService(AbstractAlbumService, FileActionMixin):
 
         for song in album.songs:
             await song_repository.delete_song(session=session, song_id=song.id)
+
+        await redis_helper.delete(f"album/{album.id}")
 
         await album_repository.delete_album(session=session, album_id=album_id)
     
