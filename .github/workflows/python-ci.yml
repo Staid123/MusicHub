@@ -97,7 +97,8 @@ jobs:
         CELERY_BROKER_URL: redis://redis:6379/0
         CELERY_RESULT_BACKEND: redis://redis:6379/0
       run: |
-        celery -A src.music.tasks.celery_app worker --loglevel=info
+        cd src
+        celery -A music.tasks.celery_app worker --loglevel=info
 
     - name: Run tests
       env:
