@@ -100,7 +100,7 @@ jobs:
 
     - name: Run tests
       env:
-        DATABASE_URL: postgresql+asyncpg://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:65401/${{ secrets.POSTGRES_DB }}
+        DATABASE_URL: postgresql+asyncpg://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:65401/${{ secrets.POSTGRES_DB_TEST }}
       run: |
         cd src
         pytest -s -v
