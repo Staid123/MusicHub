@@ -25,13 +25,13 @@ class PostgresDatabaseSettings(BaseModel):
         "pk": "pk_%(table_name)s",
     }
 
-# class PostgresTestDatabaseSettings(BaseModel):
-#     host: str
-#     port: int
-#     name: str
-#     user: str
-#     password: str
-#     url: str
+class PostgresTestDatabaseSettings(BaseModel):
+    host: str
+    port: int
+    name: str
+    user: str
+    password: str
+    url: str
 
 
 class AuthJWT(BaseModel):
@@ -72,7 +72,7 @@ class Settings(BaseSettings):
     aws: AWSSettings
     smtp: SMTPSettings
     redis: RedisSettings
-    # db_test: PostgresTestDatabaseSettings
+    db_test: PostgresTestDatabaseSettings
 
 
 settings: Settings = Settings()

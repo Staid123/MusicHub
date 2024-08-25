@@ -42,9 +42,19 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Create JWT private and public key file
+      env:
+        JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
+        JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
+      run: |
+        cd src
+        mkdir -p certs
+        echo "$JWT_PRIVATE_KEY" > src/certs/jwt-private.pem
+        echo "$JWT_PUBLIC_KEY" > src/certs/jwt-public.pem
+
     - name: Run tests
       env:
-        DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
+        DATABASE_URL: postgresql+asyncpg://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:65401/${{ secrets.POSTGRES_DB }}
       run: |
         cd src
         pytest -s -v
