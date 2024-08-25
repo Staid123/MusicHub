@@ -1,5 +1,4 @@
-version: '3.3'
-name: music-hub
+# name: music-hub
 services:
   music_fastapi:
     container_name: music_fastapi
