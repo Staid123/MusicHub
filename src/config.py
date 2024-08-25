@@ -11,7 +11,7 @@ public_key_path: Path = BASE_DIR / "certs" / "jwt-public.pem"
 
 class PostgresDatabaseSettings(BaseModel):
     host: str
-    port: int
+    port: str
     name: str
     user: str
     password: str
@@ -27,7 +27,7 @@ class PostgresDatabaseSettings(BaseModel):
 
 class PostgresTestDatabaseSettings(BaseModel):
     host: str
-    port: int
+    port: str
     name: str
     user: str
     password: str
