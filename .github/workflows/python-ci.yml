@@ -41,7 +41,7 @@ jobs:
 
     - name: Run Docker Compose
       run: |
-        cd src
+        cd .github/test/
         docker-compose up -d
 
     - name: Install dependencies
@@ -82,7 +82,7 @@ jobs:
         JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
         JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
       run: |
-        cd .github/test/
+        cd src
         mkdir -p certs
         echo "$JWT_PRIVATE_KEY" > certs/jwt-private.pem
         echo "$JWT_PUBLIC_KEY" > certs/jwt-public.pem
