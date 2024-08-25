@@ -44,6 +44,7 @@ jobs:
 
     - name: Create .env file
       run: |
+        cd src
         echo "DB__URL=${{ secrets.DB_URL }}" >> .env
         echo "DB__HOST=${{ secrets.DB_HOST }}" >> .env
         echo "DB__PORT=${{ secrets.DB_PORT }}" >> .env
