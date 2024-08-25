@@ -45,29 +45,29 @@ jobs:
     - name: Create .env file
       run: |
         cd src
-        echo "DB__URL=${{ secrets.DB_URL }}" >> .env
-        echo "DB__HOST=${{ secrets.DB_HOST }}" >> .env
-        echo "DB__PORT=${{ secrets.DB_PORT }}" >> .env
-        echo "DB__NAME=${{ secrets.DB_NAME }}" >> .env
-        echo "DB__USER=${{ secrets.DB_USER }}" >> .env
-        echo "DB__PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+        echo "DB__URL=${{ secrets.DB__URL }}" >> .env
+        echo "DB__HOST=${{ secrets.DB__HOST }}" >> .env
+        echo "DB__PORT=${{ secrets.DB__PORT }}" >> .env
+        echo "DB__NAME=${{ secrets.DB__NAME }}" >> .env
+        echo "DB__USER=${{ secrets.DB__USER }}" >> .env
+        echo "DB__PASSWORD=${{ secrets.DB__PASSWORD }}" >> .env
         echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
         echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
-        echo "DB_TEST__HOST=${{ secrets.DB_TEST_HOST }}" >> .env
-        echo "DB_TEST__PORT=${{ secrets.DB_TEST_PORT }}" >> .env
-        echo "DB_TEST__NAME=${{ secrets.DB_TEST_NAME }}" >> .env
-        echo "DB_TEST__USER=${{ secrets.DB_TEST_USER }}" >> .env
-        echo "DB_TEST__PASSWORD=${{ secrets.DB_TEST_PASSWORD }}" >> .env
-        echo "DB_TEST__URL=${{ secrets.DB_TEST_URL }}" >> .env
-        echo "AWS__BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }}" >> .env
-        echo "REDIS__HOST=${{ secrets.REDIS_HOST }}" >> .env
-        echo "REDIS__PORT=${{ secrets.REDIS_PORT }}" >> .env
-        echo "REDIS__FIRST_DB=${{ secrets.REDIS_FIRST_DB }}" >> .env
-        echo "REDIS__SECOND_DB=${{ secrets.REDIS_SECOND_DB }}" >> .env
-        echo "SMTP__USER=${{ secrets.SMTP_USER }}" >> .env
-        echo "SMTP__PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
-        echo "SMTP__HOST=${{ secrets.SMTP_HOST }}" >> .env
-        echo "SMTP__PORT=${{ secrets.SMTP_PORT }}" >> .env
+        echo "DB_TEST__HOST=${{ secrets.DB_TEST__HOST }}" >> .env
+        echo "DB_TEST__PORT=${{ secrets.DB_TEST__PORT }}" >> .env
+        echo "DB_TEST__NAME=${{ secrets.DB_TEST__NAME }}" >> .env
+        echo "DB_TEST__USER=${{ secrets.DB_TEST__USER }}" >> .env
+        echo "DB_TEST__PASSWORD=${{ secrets.DB_TEST__PASSWORD }}" >> .env
+        echo "DB_TEST__URL=${{ secrets.DB_TEST__URL }}" >> .env
+        echo "AWS__BUCKET_NAME=${{ secrets.AWS__BUCKET_NAME }}" >> .env
+        echo "REDIS__HOST=${{ secrets.REDIS__HOST }}" >> .env
+        echo "REDIS__PORT=${{ secrets.REDIS__PORT }}" >> .env
+        echo "REDIS__FIRST_DB=${{ secrets.REDIS__FIRST_DB }}" >> .env
+        echo "REDIS__SECOND_DB=${{ secrets.REDIS__SECOND_DB }}" >> .env
+        echo "SMTP__USER=${{ secrets.SMTP__USER }}" >> .env
+        echo "SMTP__PASSWORD=${{ secrets.SMTP__PASSWORD }}" >> .env
+        echo "SMTP__HOST=${{ secrets.SMTP__HOST }}" >> .env
+        echo "SMTP__PORT=${{ secrets.SMTP__PORT }}" >> .env
 
     - name: Create JWT private and public key file
       env:
