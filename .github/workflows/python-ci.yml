@@ -37,9 +37,6 @@ jobs:
         run: celery -A music.tasks.celery_app worker --loglevel=info
         volumes:
           - .src/music:src/music
-        depends_on:
-          - redis
-          - postgres
         env:
           - CELERY_BROKER_URL=redis://redis:6379/0
           - CELERY_RESULT_BACKEND=redis://redis:6379/0
