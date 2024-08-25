@@ -82,7 +82,7 @@ jobs:
         JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
         JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
       run: |
-        cd src
+        cd .github/test/
         mkdir -p certs
         echo "$JWT_PRIVATE_KEY" > certs/jwt-private.pem
         echo "$JWT_PUBLIC_KEY" > certs/jwt-public.pem
