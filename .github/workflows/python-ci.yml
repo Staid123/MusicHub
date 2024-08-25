@@ -31,6 +31,7 @@ jobs:
         image: redis:7.0.5-alpine
         ports:
           - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
     - name: Check out repository
