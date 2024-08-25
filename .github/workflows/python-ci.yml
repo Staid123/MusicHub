@@ -32,15 +32,6 @@ jobs:
         ports:
           - 6379:6379
 
-      celery:
-        image: src/
-        run: celery -A music.tasks.celery_app worker --loglevel=info
-        volumes:
-          - .src/music:src/music
-        env:
-          - CELERY_BROKER_URL=redis://redis:6379/0
-          - CELERY_RESULT_BACKEND=redis://redis:6379/0
-
     steps:
     - name: Check out repository
       uses: actions/checkout@v2
@@ -100,6 +91,13 @@ jobs:
         mkdir -p certs
         echo "$JWT_PRIVATE_KEY" > certs/jwt-private.pem
         echo "$JWT_PUBLIC_KEY" > certs/jwt-public.pem
+
+    - name: run celery worker
+      env:
+        CELERY_BROKER_URL: redis://redis:6379/0
+        CELERY_RESULT_BACKEND: redis://redis:6379/0
+      run: |
+        celery -A src.music.tasks.celery_app worker --loglevel=info
 
     - name: Run tests
       env:
