@@ -40,7 +40,9 @@ jobs:
       run: sudo apt-get install docker-compose -y
 
     - name: Run Docker Compose
-      run: docker-compose up -d
+      run: |
+        cd src
+        docker-compose up -d
 
     - name: Install dependencies
       run: |
