@@ -47,7 +47,6 @@ jobs:
         JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
         JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
       run: |
-        cd src
         mkdir -p certs
         echo "$JWT_PRIVATE_KEY" > src/certs/jwt-private.pem
         echo "$JWT_PUBLIC_KEY" > src/certs/jwt-public.pem
