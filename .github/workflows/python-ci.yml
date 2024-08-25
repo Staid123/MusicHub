@@ -94,9 +94,6 @@ jobs:
         echo "$JWT_PUBLIC_KEY" > certs/jwt-public.pem
 
     - name: run celery worker
-      env:
-        CELERY_BROKER_URL: redis://redis:6379/0
-        CELERY_RESULT_BACKEND: redis://redis:6379/0
       run: |
         cd src
         celery -A music.tasks.celery_app worker --loglevel=info
