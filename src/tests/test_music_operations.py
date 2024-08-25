@@ -1,6 +1,6 @@
 import logging
 
-file = {'photo_file': ('doberman1.jpg', open(r"D:\Projects\s3-training\doberman1.jpg", 'rb'))}
+file = {'photo_file': ('doberman1.jpg', open(r"content\doberman1.jpg", 'rb'))}
 file_name = None
 
 
@@ -76,8 +76,8 @@ async def test_download_album_photo(ac, ):
 
 
 files = {
-    'photo_file': ('doberman2.jpg', open(r"D:\Projects\s3-training\doberman1.jpg", 'rb')),
-    'song_file': ('song.mp3', open(r"D:\Projects\s3-training\song.mp3", 'rb'))
+    'photo_file': ('doberman2.jpg', open(r"content\doberman1.jpg", 'rb')),
+    'song_file': ('song.mp3', open(r"content\song.mp3", 'rb'))
 }
 
 song_filename = None
