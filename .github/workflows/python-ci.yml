@@ -96,7 +96,7 @@ jobs:
     - name: run celery worker
       run: |
         cd src
-        celery -A music.tasks.celery_app worker --loglevel=info
+        celery -A music.tasks.celery_app worker --loglevel=info &
 
     - name: Run tests
       env:
