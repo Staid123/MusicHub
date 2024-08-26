@@ -20,7 +20,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB_TEST }}
         ports:
-          - 65401:5432
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -100,7 +100,7 @@ jobs:
 
     - name: Run tests
       env:
-        DATABASE_URL: postgresql+asyncpg://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:65401/${{ secrets.POSTGRES_DB_TEST }}
+        DATABASE_URL: postgresql+asyncpg://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB_TEST }}
       run: |
         cd src
         pytest -s -v
